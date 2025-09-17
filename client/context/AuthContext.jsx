@@ -21,8 +21,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await axios.get("/api/auth/check-auth");
       if (data.success) {
-        setAuthUser(data.user);
-        connectSocket(data.user);
+        setAuthUser(data.userdata);
+        connectSocket(data.userdata);
       }
     } catch (err) {
       toast.error(err.message);
@@ -32,8 +32,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (state, credentials) => {
     const { data } = await axios.post(`/api/auth/${state}`, credentials);
     if (data.success) {
-      setAuthUser(data.user);
-      connectSocket(data.user);
+      setAuthUser(data.userdata);
+      connectSocket(data.userdata);
       axios.defaults.headers.common["token"] = data.token;
       setToken(data.token);
       localStorage.setItem("token", data.token);
@@ -62,9 +62,9 @@ export const AuthProvider = ({ children }) => {
   //update profile section of the user
   const updateProfile = async (body) => {
     try {
-      const { data } = await axios.put("/api/auth/update", body);
+      const { data } = await axios.put("/api/auth/update-profile", body);
       if (data.success) {
-        setAuthUser(data.user);
+        setAuthUser(data.userdata);
         toast.success("Profile updated Successfully");
       } else {
         toast.error(data.message);

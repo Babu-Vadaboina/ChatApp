@@ -1,14 +1,39 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import assets from "../assets/assets";
+import { AuthContext } from "../../context/AuthContext";
 const ProfilePage = () => {
+  const { authUser, updateProfile } = useContext(AuthContext);
   const [selectedImage, setSelectedImage] = useState(null);
   const navigate = useNavigate();
-  const [name, setName] = useState("Martin Johnson");
-  const [bio, setBio] = useState(" hi everyone, Iam using Quickchat");
-  const handleSubmit = (e) => {
+  const [name, setName] = useState(authUser?.fullName || "");
+  const [bio, setBio] = useState(authUser?.bio || "");
+
+  useEffect(() => {
+    if (authUser) {
+      setName(authUser.fullName || "");
+      setBio(authUser.bio || "");
+    }
+  }, [authUser]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/");
+    if (!selectedImage) {
+      await updateProfile({ fullName: name, bio });
+      navigate("/");
+    } else {
+      const reader = new FileReader();
+      reader.readAsDataURL(selectedImage);
+      reader.onload = async () => {
+        const base64Img = reader.result;
+        await updateProfile({
+          fullName: name,
+          bio,
+          profilePic: base64Img,
+        }).catch((err) => console.error(err));
+        navigate("/");
+      };
+    }
   };
 
   return (
@@ -37,7 +62,7 @@ const ProfilePage = () => {
               src={
                 selectedImage
                   ? URL.createObjectURL(selectedImage)
-                  : assets.avatar_icon
+                  : authUser?.profilePic || assets.avatar_icon
               }
               alt=""
               className={`w-12 h-12 ${selectedImage && "rounded-full"}`}
@@ -72,8 +97,14 @@ const ProfilePage = () => {
           </button>
         </form>
         <img
-          className="max-w-44 aspect-square rounded-full mx-10 mx-sm:mt-10"
-          src={assets.logo_icon}
+          className={`max-w-44 aspect-square rounded-full mx-10 mx-sm:mt-10 ${
+            selectedImage && "rounded-full"
+          }`}
+          src={
+            selectedImage
+              ? URL.createObjectURL(selectedImage)
+              : authUser?.profilePic || assets.logo_icon
+          }
           alt=""
         />
       </div>

@@ -67,26 +67,26 @@ export const login = async (req, res) => {
 };
 //check if user is authenticated or not
 export const checkAuth = async (req, res) => {
-  res.json({ success: true, user: req.user });
+  res.json({ success: true, userdata: req.user });
 };
 
 //update user profile details
 export const updateProfile = async (req, res) => {
   try {
-    const { profilepic, bio, fullName } = req.body;
+    const { profilePic, bio, fullName } = req.body;
     const userId = req.user._id;
     let updatedUser;
-    if (!profilepic) {
+    if (!profilePic) {
       updatedUser = await User.findByIdAndUpdate(
         userId,
         { bio, fullName },
         { new: true }
       );
     } else {
-      const upload = await cloudinary.uploader.upload(profilepic);
+      const upload = await cloudinary.uploader.upload(profilePic);
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { bio, fullName, profilepic: upload.secure_url },
+        { bio, fullName, profilePic: upload.secure_url },
         { new: true }
       );
     }
