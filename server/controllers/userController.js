@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
-  const { fullname, email, password, bio } = req.body;
+  const { fullName, email, password, bio } = req.body;
   try {
-    if (!fullname || !email || !password || !bio) {
+    if (!fullName || !email || !password || !bio) {
       return res.json({ success: false, message: "Missing Details" });
     }
     const user = await User.findOne({ email });
@@ -16,8 +16,8 @@ export const signup = async (req, res) => {
     //bcrypting the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const newUser = new User.create({
-      fullname,
+    const newUser = await User.create({
+      fullName,
       email,
       password: hashedPassword,
       bio,
@@ -34,7 +34,7 @@ export const signup = async (req, res) => {
     console.log(err.message);
     res.json({
       success: false,
-      message: "error.msg",
+      message: err.message,
     });
   }
 };
@@ -61,7 +61,7 @@ export const login = async (req, res) => {
     console.log(err.message);
     res.json({
       success: false,
-      message: "error.msg",
+      message: err.message,
     });
   }
 };
@@ -73,20 +73,20 @@ export const checkAuth = async (req, res) => {
 //update user profile details
 export const updateProfile = async (req, res) => {
   try {
-    const { profilepic, bio, fullname } = req.body;
+    const { profilepic, bio, fullName } = req.body;
     const userId = req.user._id;
     let updatedUser;
     if (!profilepic) {
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { bio, fullname },
+        { bio, fullName },
         { new: true }
       );
     } else {
       const upload = await cloudinary.uploader.upload(profilepic);
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { bio, fullname, profilepic: upload.secure_url },
+        { bio, fullName, profilepic: upload.secure_url },
         { new: true }
       );
     }

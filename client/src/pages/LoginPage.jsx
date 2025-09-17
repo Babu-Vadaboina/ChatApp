@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import assets from "../assets/assets";
+import toast from "react-hot-toast";
+import { AuthContext } from "../../context/AuthContext";
 
 const LoginPage = () => {
   const [currState, setCurrState] = useState("Sign up");
@@ -9,12 +11,34 @@ const LoginPage = () => {
   const [bio, setBio] = useState("");
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
+  const { login } = useContext(AuthContext);
+
   const onSubmitHandler = (event) => {
     event.preventDefault();
     if (currState === "Sign up" && !isDataSubmitted) {
+      if (!fullName || !email || !password) {
+        toast.error("Please fill in name, email, and password.");
+        return;
+      }
       setIsDataSubmitted(true);
       return;
     }
+
+    // Add validation for the bio on the second step of sign-up
+    if (currState === "Sign up" && !bio) {
+      toast.error("Please provide a short bio.");
+      return;
+    }
+
+    const endpoint = currState === "Sign up" ? "signup" : "login";
+    const payload = { email, password };
+
+    if (currState === "Sign up") {
+      payload.fullName = fullName;
+      payload.bio = bio;
+    }
+
+    login(endpoint, payload);
   };
 
   return (
