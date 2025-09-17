@@ -26,6 +26,45 @@ export const AuthProvider = ({ children }) => {
       toast.error(err.message);
     }
   };
+  //login function to handle authentication and socket connection
+  const login = async (state, credentials) => {
+    const { data } = await axios.post(`/api/auth/${state}`, credentials);
+    if (data.success) {
+      setAuthUser(data.user);
+      connectSocket(data.user);
+      axios.defaults.headers.common["token"] = data.token;
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      toast.success(data.message);
+    } else {
+      toast.error(data.message);
+    }
+  };
+  //logout functionality
+  const logout = async () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    axios.defaults.headers.common["token"] = null;
+    setAuthUser(null);
+    setOnlineUsers([]);
+    socket?.disconnect();
+    toast.success("Logged out successfully");
+  };
+
+  //update profile section of the user
+  const updateProfile = async (body) => {
+    try {
+      const { data } = await axios.put("/api/auth/update", body);
+      if (data.success) {
+        setAuthUser(data.user);
+        toast.success("Profile updated Successfully");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
   //connecting to socket after authenticaton
   const connectSocket = (userData) => {
     if (!userData || socket?.connected) return;
