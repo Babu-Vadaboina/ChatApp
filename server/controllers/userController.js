@@ -23,7 +23,6 @@ export const signup = async (req, res) => {
       bio,
     });
     const token = generateToken(newUser._id);
-    await newUser.save();
     return res.json({
       success: true,
       userdata: newUser,
@@ -57,6 +56,7 @@ export const login = async (req, res) => {
         message: "User logged in successfully",
       });
     }
+    return res.json({ success: false, message: "Invalid credentials" });
   } catch (err) {
     console.log(err.message);
     res.json({
